@@ -27,20 +27,14 @@ CUcontext cuContext;
 CUmodule cuModule;
 
 CUfunction cuSimpleBfs;
-CUfunction cuQueueBfs;
-CUfunction cuNextLayer;
-CUfunction cuCountDegrees;
-CUfunction cuScanDegrees;
-CUfunction cuAssignVerticesNextQueue;
 
 CUdeviceptr d_adjacencyList;
 CUdeviceptr d_edgesOffset;
 CUdeviceptr d_edgesSize;
 CUdeviceptr d_distance;
 CUdeviceptr d_parent;
-//CUdeviceptr d_currentQueue;
-//CUdeviceptr d_nextQueue;
-//CUdeviceptr d_degrees;
+
+
 int *incrDegrees;
 
 void initCuda(Graph &G) {
@@ -50,12 +44,6 @@ void initCuda(Graph &G) {
     checkError(cuCtxCreate(&cuContext, 0, cuDevice), "cannot create context");
     checkError(cuModuleLoad(&cuModule, "quickCUDA.ptx"), "cannot load module");
     checkError(cuModuleGetFunction(&cuSimpleBfs, cuModule, "simpleBfs"), "cannot get kernel handle");
-//    checkError(cuModuleGetFunction(&cuQueueBfs, cuModule, "queueBfs"), "cannot get kernel handle");
-//    checkError(cuModuleGetFunction(&cuNextLayer, cuModule, "nextLayer"), "cannot get kernel handle");
-//    checkError(cuModuleGetFunction(&cuCountDegrees, cuModule, "countDegrees"), "cannot get kernel handle");
-//    checkError(cuModuleGetFunction(&cuScanDegrees, cuModule, "scanDegrees"), "cannot get kernel handle");
-//    checkError(cuModuleGetFunction(&cuAssignVerticesNextQueue, cuModule, "assignVerticesNextQueue"),
-//               "cannot get kernel handle");
 
     //copy memory to device
     checkError(cuMemAlloc(&d_adjacencyList, G.numEdges * sizeof(int)), "cannot allocate d_adjacencyList");
@@ -63,10 +51,6 @@ void initCuda(Graph &G) {
     checkError(cuMemAlloc(&d_edgesSize, G.numVertices * sizeof(int)), "cannot allocate d_edgesSize");
     checkError(cuMemAlloc(&d_distance, G.numVertices * sizeof(int)), "cannot allocate d_distance");
     checkError(cuMemAlloc(&d_parent, G.numVertices * sizeof(int)), "cannot allocate d_parent");
-//    checkError(cuMemAlloc(&d_currentQueue, G.numVertices * sizeof(int)), "cannot allocate d_currentQueue");
-//    checkError(cuMemAlloc(&d_nextQueue, G.numVertices * sizeof(int)), "cannot allocate d_nextQueue");
-//    checkError(cuMemAlloc(&d_degrees, G.numVertices * sizeof(int)), "cannot allocate d_degrees");
-//    checkError(cuMemAllocHost((void **) &incrDegrees, sizeof(int) * G.numVertices), "cannot allocate memory");
 
     checkError(cuMemcpyHtoD(d_adjacencyList, G.adjacencyList.data(), G.numEdges * sizeof(int)),
                "cannot copy to d_adjacencyList");
@@ -85,9 +69,6 @@ void finalizeCuda() {
     checkError(cuMemFree(d_edgesSize), "cannot free memory for d_edgesSize");
     checkError(cuMemFree(d_distance), "cannot free memory for d_distance");
     checkError(cuMemFree(d_parent), "cannot free memory for d_parent");
-//    checkError(cuMemFree(d_currentQueue), "cannot free memory for d_parent");
-//    checkError(cuMemFree(d_nextQueue), "cannot free memory for d_parent");
-//    checkError(cuMemFreeHost(incrDegrees), "cannot free memory for incrDegrees");
 }
 
 void checkOutput(std::vector<int> &distance, std::vector<int> &expectedDistance, Graph &G) {
@@ -114,8 +95,6 @@ void initializeCudaBfs(int startVertex, std::vector<int> &distance, std::vector<
     checkError(cuMemcpyHtoD(d_parent, parent.data(), G.numVertices * sizeof(int)),
                "cannot copy to d_parent");
 
-//    int firstElementQueue = startVertex;
-//    cuMemcpyHtoD(d_currentQueue, &firstElementQueue, sizeof(int));
 }
 
 void finalizeCudaBfs(std::vector<int> &distance, std::vector<int> &parent, Graph &G) {
@@ -186,7 +165,6 @@ int main(int argc, char **argv) {
     //run CUDA simple parallel bfs
     runCudaSimpleBfs(startVertex, G, distance, parent);
     checkOutput(distance, expectedDistance, G);
-
 
     finalizeCuda();
     return 0;
