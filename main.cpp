@@ -46,7 +46,7 @@ int *incrDegrees;
 void initCuda(Graph &G) {
     //initialize CUDA
     cuInit(0);
-    checkError(cuDeviceGet(&cuDevice, 1), "cannot get device 0");
+    checkError(cuDeviceGet(&cuDevice, 0), "cannot get device 0");
     checkError(cuCtxCreate(&cuContext, 0, cuDevice), "cannot create context");
     checkError(cuModuleLoad(&cuModule, "bfsCUDA.ptx"), "cannot load module");
     checkError(cuModuleGetFunction(&cuSimpleBfs, cuModule, "simpleBfs"), "cannot get kernel handle");

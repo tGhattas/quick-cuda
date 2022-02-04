@@ -1,8 +1,8 @@
 CUDA_INSTALL_PATH ?= /usr/local/cuda
 GCC_VER = -5
 
-CXX := /usr/bin/g++$(GCC_VER)
-CC := /usr/bin/gcc$(GCC_VER)
+CXX := /usr/bin/g++
+CC := /usr/bin/gcc
 LINK := $(CXX) -fPIC
 CCPATH := ./gcc
 NVCC  := $(CUDA_INSTALL_PATH)/bin/nvcc -ccbin $(CCPATH)
@@ -14,7 +14,7 @@ INCLUDES = -I. -I$(CUDA_INSTALL_PATH)/include
 LIB_CUDA := -L/usr/lib/nvidia-current -lcuda
 
 # Options
-NVCCOPTIONS = -arch sm_20 -ptx -Wno-deprecated-gpu-targets
+NVCCOPTIONS = -arch sm_60 -ptx -Wno-deprecated-gpu-targets
 CXXOPTIONS = -std=c++17 -O2
 
 # Common flags
